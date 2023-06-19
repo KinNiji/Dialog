@@ -28,7 +28,7 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>智能助理</title>
-  </head>
+  <script defer src="bundle.js"></script></head>
 
   <body>
     <noscript>
@@ -45,6 +45,19 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+    <script type="text/javascript">
+      (function(d, t) {
+          var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
+          v.onload = function() {
+            window.voiceflow.chat.load({
+              verify: { projectID: '648c05e1bfb0bc0006f399ab' },
+              url: 'https://general-runtime.voiceflow.com',
+              versionID: 'production'
+            });
+          }
+          v.src = "https://cdn.voiceflow.com/widget/bundle.mjs"; v.type = "text/javascript"; s.parentNode.insertBefore(v, s);
+      })(document, 'script');
+    </script>
     <script src="//g.alicdn.com/chatui/sdk-v2/0.2.2/sdk.js"></script>
     <script src="//g.alicdn.com/chatui/extensions/0.0.7/isv-parser.js"></script>
     <script src="//g.alicdn.com/chatui/icons/0.2.7/index.js" async></script>
