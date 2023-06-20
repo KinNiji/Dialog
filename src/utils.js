@@ -1,14 +1,12 @@
 import axios from "axios";
 
 export default class Utils {
-  async request(url, method, q) {
+  async request(path, method, params=null) {
     return new Promise((resolve, reject) => {
       axios({
-        url: `//${process.env.HOST_NAME}:${process.env.BACK_END_PORT}${url}`,
+        url: `//${process.env.BACK_END_HOST}:${process.env.BACK_END_PORT}${path}`,
         method: method,
-        data: {
-          q: q,
-        },
+        data: params,
       })
         .then((response) => {
           resolve(response);

@@ -31,7 +31,7 @@ export default function QuestionMultiCard({ data, ctx, meta }) {
 
       setConfirm(true);
 
-      utils.request("/api/scale", "post", "你好").then((response) => {
+      utils.request(process.env.PATH_GET_QUESTION.format({id: 1}), "get").then((response) => {
         ctx.appendMessage(response);
       });
     } else {
