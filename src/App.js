@@ -8,8 +8,8 @@ import { SystemMessage, CardMessage, TextMessage } from "./dao/message";
 const utils = new Util();
 
 const SCALES = {
-  "PHQ9": "一般健康问卷",
-  "GAD7": "一般焦虑量表",
+  "PHQ-9": "一般健康问卷",
+  "GAD-7": "一般焦虑量表",
   "ISI": "睡眠情况问卷",
   "PSS": "压力知觉量表",
 }
@@ -58,12 +58,12 @@ export default function App() {
       // 请求配置
       requests: {
         send: function (msg) {
-          // console.log("触发请求", msg);
+          console.log("触发请求", msg);
           if (msg.type === "text") {
             if (msg.content.text === "心理筛查") {
               return new CardMessage("BaseInfo")
             }
-            else if (["PHQ9", "GAD7", "ISI", "PSS"].includes(msg.content.text)) {
+            else if (Object.keys(SCALES).includes(msg.content.text)) {
               if (bot.config.user.scales.includes(msg.content.text)) {
                 return utils.request(process.env.PATH_GET_SCALE, "post", { paper_name: SCALES[msg.content.text] });
               } 
@@ -81,13 +81,10 @@ export default function App() {
         // 埋点
         track(data) {
           console.log("埋点", data);
-          if (data.act === "click" && ["PHQ9", "GAD7", "ISI", "PSS"].includes(data.ext.text)) {
-            bot.config.user.scales.splice(bot.config.user.scales.indexOf(data.ext.text), 1);
-          }
         },
         // 消息数据后处理函数
         parseResponse(response, requestType) {
-          // console.log("触发响应处理", response);
+          console.log("触发响应处理", response);
           if (requestType === 'send' && response.data) {
             return parser(response);
           }

@@ -36,7 +36,7 @@ export function BaseInfo({ data, ctx, meta }) {
 
   async function handleConfirm() {
     if (gender && age) {
-      if (age < 1 || age > 120) {
+      if (typeof age === 'number' && (age < 1 || age > 120)) {
         toast.fail("请输入合理的年龄！");
       }
       else {
@@ -85,12 +85,12 @@ export function QuestionSingle({ data, ctx, meta }) {
   let scale = data.scale;
   let question = data.question;
 
-  const index = useState(scale.index + 1);
+  const [index] = useState(scale.index + 1);
   const [value, setValue] = useState();
   const [options, setOptions] = useState(question.options);
   const [optionTrack, setOptionTrack] = useState([]);
   const [confirm, setConfirm] = useState(false);
-  const start = useState(Date.now());
+  const [start] = useState(Date.now());
 
   function handleChange(val) {
     setOptionTrack(optionTrack.concat(val));
@@ -113,6 +113,7 @@ export function QuestionSingle({ data, ctx, meta }) {
         ctx.appendMessage(new CardMessage("QuestionSingle", { scale: scale, question: question }));
       } else {
         ctx.appendMessage(new TextMessage(scale.name + "量表填写完成！"));
+        ctx.uiConfig.user.scales.splice(ctx.uiConfig.user.scales.indexOf(scale.abb), 1);
         if (ctx.uiConfig.user.scales.length > 0) {
           ctx.appendMessage(new TextMessage("请继续选择量表进行作答:"));
           ctx.appendMessage(new CardMessage("slot", list2slot(ctx.uiConfig.user.scales)));

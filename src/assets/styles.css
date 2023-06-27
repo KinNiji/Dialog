@@ -21,3 +21,9 @@ code {
   margin: 0 10px;
 }
 
+.S--wide #root {
+  width: 100%;
+  max-width: 960px;
+  max-height: 900px;
+}
+

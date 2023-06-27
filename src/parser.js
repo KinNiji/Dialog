@@ -39,7 +39,10 @@ async function scale_parser(response) {
             new CardMessage("QuestionSingle", { scale: scale, question: question })
         ]
     } else {
-        return new TextMessage(`响应返回码异常：${response.code}`)
+        return [
+            new TextMessage(`响应返回码异常：${response.code}`),
+            new CardMessage("BaseInfo")
+        ]
     }
 }
 

@@ -2,6 +2,7 @@ export default class Scale {
   constructor(data) {
     this.id = data.id;
     this.name = data.name;
+    this.abb = this.name.match(/[（()](.*?)[）)]/)[1];
     this.description = data.description;
     this.rules = data.rules;
     this.questions = JSON.parse(data.questions);
