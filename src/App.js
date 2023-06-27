@@ -1,113 +1,126 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./assets/styles.css";
-import QuestionMultiCard from "./card";
-import Utils from "./utils";
+import Util from "./util";
+import { parser } from "./parser";
+import { BaseInfo, QuestionSingle } from "./components/card";
+import { SystemMessage, CardMessage, TextMessage } from "./dao/message";
 
-const utils = new Utils();
+const utils = new Util();
+
+const SCALES = {
+  "PHQ9": "一般健康问卷",
+  "GAD7": "一般焦虑量表",
+  "ISI": "睡眠情况问卷",
+  "PSS": "压力知觉量表",
+}
 
 export default function App() {
   const wrapper = useRef();
 
   useEffect(() => {
-    // const [canRecord, setCanRecord] = useState(true);
-
     const bot = new window.ChatSDK({
       root: wrapper.current,
 
       // 界面相关配置
       config: {
+        // i18n，当前语言，支持 en-US: 英文 zh-CN: 中文
+        lang: 'zh-CN',
+        // 导航栏
         navbar: {
           title: "DemoBot",
         },
-        robot: {
-          avatar: "//gw.alicdn.com/tfs/TB1U7FBiAT2gK0jSZPcXXcKkpXa-108-108.jpg",
+        // 机器人信息
+        robot: {},
+        // 用户信息
+        user: {
+          uuid: utils.uuid(),
+          scales: Object.keys(SCALES)
         },
+        // 初始化消息
         messages: [
-          {
-            type: "text",
-            content: {
-              text: "Bot init message",
-            },
-          },
+          new SystemMessage("DemoBot开始运行")
         ],
-        // inputType: canRecord ? 'voice' : 'text',
+        // 快捷短语
+        quickReplies: [],
+        // 输入框占位符
+        placeholder: "",
+        // 侧边栏
+        sidebar: "",
+        // 工具栏
+        toolbar: [],
+        // 一进页面发消息
+        query: '心理筛查',
+        // text: 文本输入
+        // voice：语音输入
+        inputType: 'text'
       },
 
       // 请求配置
       requests: {
         send: function (msg) {
+          // console.log("触发请求", msg);
           if (msg.type === "text") {
-            console.log(msg.content.text);
-            let text = "default";
-            let data = null;
-            if (msg.content.text == "量表") {
-              data = utils.request(process.env.PATH_GET_SCALE, "post", { paper_name: process.env.PHQ9 });
-              console.log('data', data);
-              if (data.code == "200") {
-                data = data.data.result_list[0]
-                return [
-                  {
-                    type: "text",
-                    content: {
-                      text: data.name,
-                    },
-                  }, {
-                    type: "text",
-                    content: {
-                      text: data.description,
-                    },
-                  },
-                  {
-                    type: "text",
-                    content: {
-                      text: data.rules,
-                    },
-                  }
-                ];
-              }
-            } else {
-              return {
-                type: "text",
-                content: {
-                  text: text,
-                },
-              };
+            if (msg.content.text === "心理筛查") {
+              return new CardMessage("BaseInfo")
             }
-
-
+            else if (["PHQ9", "GAD7", "ISI", "PSS"].includes(msg.content.text)) {
+              if (bot.config.user.scales.includes(msg.content.text)) {
+                return utils.request(process.env.PATH_GET_SCALE, "post", { paper_name: SCALES[msg.content.text] });
+              } 
+              else {
+                return new TextMessage("该量表已经填写过");
+              }
+            }
+            return new TextMessage("这是一条服务端返回默认的数据");
           }
+        },
+      },
+
+      // 其它处理函数配置
+      handlers: {
+        // 埋点
+        track(data) {
+          console.log("埋点", data);
+          if (data.act === "click" && ["PHQ9", "GAD7", "ISI", "PSS"].includes(data.ext.text)) {
+            bot.config.user.scales.splice(bot.config.user.scales.indexOf(data.ext.text), 1);
+          }
+        },
+        // 消息数据后处理函数
+        parseResponse(response, requestType) {
+          // console.log("触发响应处理", response);
+          if (requestType === 'send' && response.data) {
+            return parser(response);
+          }
+          return response;
         },
       },
 
       // 组件映射配置
       components: {
-        "question-multi": QuestionMultiCard,
+        "BaseInfo": BaseInfo,
+        "QuestionSingle": QuestionSingle,
+        'HorizontalTilingSingle': {
+          name: 'HorizontalTilingSingle',
+          url: '//g.alicdn.com/alime-components/slot/0.1.3/index.js'
+        },
       },
 
-      // makeRecorder({ ctx }) {
-      //   return {
-      //     canRecord,
-      //     onStart() {
-      //       // 开始录音
-      //       // nativeInvoke('startVoiceRecognition');
-      //     },
-      //     onEnd() {
-      //       // 停止录音
-      //       // nativeInvoke('stopVoiceRecognition', (text) => {
-      //       //   // 识别到文本
-      //       //   ctx.postMessage({
-      //       //     type: 'text',
-      //       //     content: { text },
-      //       //   });
-      //       // });
-      //     },
-      //     onCancel() {
-      //       // 录音
-      //       // nativeInvoke('cancelVoiceRecognition');
-      //     },
-      //   };
-      // }
-
+      makeRecorder({ ctx }) {
+        return {
+          // 是否支持语音输入，
+          canRecord: true,
+          onStart() {
+            console.log('开始录音');
+          },
+          onEnd() {
+            console.log('停止录音');
+            // 识别到文本后要 ctx.postMessage
+          },
+          onCancel() {
+            console.log('取消录音');
+          },
+        };
+      }
     });
 
     bot.run();
