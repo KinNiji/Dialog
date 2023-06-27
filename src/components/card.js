@@ -11,11 +11,8 @@ import {
   RadioGroup,
   toast,
 } from "@chatui/core";
-import Util from "../util";
 import { getQuestion } from "../parser";
 import { TextMessage, CardMessage } from "../dao/message";
-
-const utils = new Util();
 
 function list2slot(data) {
   let scales = { hideShortcuts: true, list: [] }
@@ -93,7 +90,7 @@ export function QuestionSingle({ data, ctx, meta }) {
   const [options, setOptions] = useState(question.options);
   const [optionTrack, setOptionTrack] = useState([]);
   const [confirm, setConfirm] = useState(false);
-  const [start, setStart] = useState(Date.now());
+  const start = useState(Date.now());
 
   function handleChange(val) {
     setOptionTrack(optionTrack.concat(val));

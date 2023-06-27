@@ -26,7 +26,7 @@ export function getQuestion(scale) {
 
 async function scale_parser(response) {
     let scale;
-    if (response.code == 200) {
+    if (response.code === 200) {
         // 默认选取结果列表中的第一个量表
         response = response.data.result_list[0]
         console.log("执行响应处理：获取量表", response);
@@ -45,7 +45,7 @@ async function scale_parser(response) {
 
 function question_parser(response) {
     let question;
-    if (response.code == 200) {
+    if (response.code === 200) {
         response = response.data;
         console.log("执行响应处理：获取题目", response);
         question = new Question(response);
