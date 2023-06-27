@@ -13,36 +13,29 @@ import {
 } from "@chatui/core";
 import { getQuestion } from "../parser";
 import { TextMessage, CardMessage } from "../dao/message";
+import Util from "../util";
 
-function list2slot(data) {
-  let scales = { hideShortcuts: true, list: [] }
-
-  for (let scale of data) {
-    scales.list.push({ title: scale });
-  }
-
-  return scales;
-}
+const utils = new Util();
 
 export function BaseInfo({ data, ctx, meta }) {
-
   const [gender, setGender] = useState();
   const gender_option = [
-    { label: '男', value: 'male' },
-    { label: '女', value: 'female' }
+    { label: "男", value: "male" },
+    { label: "女", value: "female" },
   ];
   const [age, setAge] = useState();
   const [confirm, setConfirm] = useState(false);
 
   async function handleConfirm() {
     if (gender && age) {
-      if (typeof age === 'number' && (age < 1 || age > 120)) {
+      if (isNaN(age) || age < 1 || age > 120) {
         toast.fail("请输入合理的年龄！");
-      }
-      else {
+      } else {
         setConfirm(true);
         ctx.appendMessage(new TextMessage("请选择量表进行作答:"));
-        ctx.appendMessage(new CardMessage("slot", list2slot(ctx.uiConfig.user.scales)));
+        ctx.appendMessage(
+          new CardMessage("slot", utils.list2slot(ctx.uiConfig.user.scales))
+        );
       }
     } else {
       toast.fail("请完成所有的内容！");
@@ -51,19 +44,21 @@ export function BaseInfo({ data, ctx, meta }) {
 
   return (
     <Card>
-      <CardTitle><b>信息收集</b></CardTitle>
+      <CardTitle>
+        <b>信息收集</b>
+      </CardTitle>
       <CardContent>
         <p>性别</p>
         <RadioGroup
           value={gender}
           options={gender_option}
-          onChange={val => setGender(val)}
+          onChange={(val) => setGender(val)}
           disabled={confirm}
         />
         <p>年龄</p>
         <Input
           value={age}
-          onChange={val => setAge(val)}
+          onChange={(val) => setAge(val)}
           placeholder="请输入年龄..."
           disabled={confirm}
         />
@@ -74,7 +69,8 @@ export function BaseInfo({ data, ctx, meta }) {
           block={false}
           onClick={handleConfirm}
           disabled={confirm}
-        >确认
+        >
+          确认
         </Button>
       </CardActions>
     </Card>
@@ -110,15 +106,24 @@ export function QuestionSingle({ data, ctx, meta }) {
       if (scale.index < scale.questions.length) {
         console.log(`选项轨迹：${optionTrack} 响应时间：${Date.now() - start}`);
         question = await getQuestion(scale);
-        ctx.appendMessage(new CardMessage("QuestionSingle", { scale: scale, question: question }));
+        ctx.appendMessage(
+          new CardMessage("QuestionSingle", {
+            scale: scale,
+            question: question,
+          })
+        );
       } else {
         ctx.appendMessage(new TextMessage(scale.name + "量表填写完成！"));
-        ctx.uiConfig.user.scales.splice(ctx.uiConfig.user.scales.indexOf(scale.abb), 1);
+        ctx.uiConfig.user.scales.splice(
+          ctx.uiConfig.user.scales.indexOf(scale.abb),
+          1
+        );
         if (ctx.uiConfig.user.scales.length > 0) {
           ctx.appendMessage(new TextMessage("请继续选择量表进行作答:"));
-          ctx.appendMessage(new CardMessage("slot", list2slot(ctx.uiConfig.user.scales)));
-        }
-        else {
+          ctx.appendMessage(
+            new CardMessage("slot", utils.list2slot(ctx.uiConfig.user.scales))
+          );
+        } else {
           ctx.appendMessage(new TextMessage("全部量表填写完成！"));
         }
       }
@@ -129,19 +134,17 @@ export function QuestionSingle({ data, ctx, meta }) {
 
   return (
     <Card size="xl">
-      <CardTitle><b>
-        {scale.name}
-        &nbsp;&nbsp;
-        {index}/{scale.questions.length}
-      </b></CardTitle>
+      <CardTitle>
+        <b>
+          {scale.name}
+          &nbsp;&nbsp;
+          {index}/{scale.questions.length}
+        </b>
+      </CardTitle>
       {question.pic_path && <CardMedia image={question.pic_path} />}
       <CardText>{question.text}</CardText>
       <CardContent>
-        <RadioGroup
-          value={value}
-          options={options}
-          onChange={handleChange}
-        />
+        <RadioGroup value={value} options={options} onChange={handleChange} />
       </CardContent>
       <CardActions>
         <Button
@@ -149,7 +152,8 @@ export function QuestionSingle({ data, ctx, meta }) {
           block={false}
           onClick={handleConfirm}
           disabled={confirm}
-        >确认
+        >
+          确认
         </Button>
       </CardActions>
     </Card>

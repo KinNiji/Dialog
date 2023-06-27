@@ -10,9 +10,9 @@ const utils = new Util();
 const SCALES = {
   "PHQ-9": "一般健康问卷",
   "GAD-7": "一般焦虑量表",
-  "ISI": "睡眠情况问卷",
-  "PSS": "压力知觉量表",
-}
+  ISI: "睡眠情况问卷",
+  PSS: "压力知觉量表",
+};
 
 export default function App() {
   const wrapper = useRef();
@@ -24,7 +24,7 @@ export default function App() {
       // 界面相关配置
       config: {
         // i18n，当前语言，支持 en-US: 英文 zh-CN: 中文
-        lang: 'zh-CN',
+        lang: "zh-CN",
         // 导航栏
         navbar: {
           title: "DemoBot",
@@ -34,12 +34,10 @@ export default function App() {
         // 用户信息
         user: {
           uuid: utils.uuid(),
-          scales: Object.keys(SCALES)
+          scales: Object.keys(SCALES),
         },
         // 初始化消息
-        messages: [
-          new SystemMessage("DemoBot开始运行")
-        ],
+        messages: [new SystemMessage("DemoBot开始运行")],
         // 快捷短语
         quickReplies: [],
         // 输入框占位符
@@ -49,10 +47,10 @@ export default function App() {
         // 工具栏
         toolbar: [],
         // 一进页面发消息
-        query: '心理筛查',
+        query: "心理筛查",
         // text: 文本输入
         // voice：语音输入
-        inputType: 'text'
+        inputType: "text",
       },
 
       // 请求配置
@@ -61,13 +59,16 @@ export default function App() {
           console.log("触发请求", msg);
           if (msg.type === "text") {
             if (msg.content.text === "心理筛查") {
-              return new CardMessage("BaseInfo")
-            }
-            else if (Object.keys(SCALES).includes(msg.content.text)) {
+              return new CardMessage("BaseInfo");
+            } else if (Object.keys(SCALES).includes(msg.content.text)) {
               if (bot.config.user.scales.includes(msg.content.text)) {
-                return utils.request(process.env.PATH_GET_SCALE, "post", { paper_name: SCALES[msg.content.text] });
-              } 
-              else {
+                return utils.request(
+                  process.env.PATH_GET_SCALE,
+                  "post",
+                  { paper_name: SCALES[msg.content.text] },
+                  bot.appRef.current.getCtx()
+                );
+              } else {
                 return new TextMessage("该量表已经填写过");
               }
             }
@@ -85,7 +86,7 @@ export default function App() {
         // 消息数据后处理函数
         parseResponse(response, requestType) {
           console.log("触发响应处理", response);
-          if (requestType === 'send' && response.data) {
+          if (requestType === "send" && response.data) {
             return parser(response);
           }
           return response;
@@ -94,11 +95,11 @@ export default function App() {
 
       // 组件映射配置
       components: {
-        "BaseInfo": BaseInfo,
-        "QuestionSingle": QuestionSingle,
-        'HorizontalTilingSingle': {
-          name: 'HorizontalTilingSingle',
-          url: '//g.alicdn.com/alime-components/slot/0.1.3/index.js'
+        BaseInfo: BaseInfo,
+        QuestionSingle: QuestionSingle,
+        HorizontalTilingSingle: {
+          name: "HorizontalTilingSingle",
+          url: "//g.alicdn.com/alime-components/slot/0.1.3/index.js",
         },
       },
 
@@ -107,17 +108,17 @@ export default function App() {
           // 是否支持语音输入，
           canRecord: true,
           onStart() {
-            console.log('开始录音');
+            console.log("开始录音");
           },
           onEnd() {
-            console.log('停止录音');
+            console.log("停止录音");
             // 识别到文本后要 ctx.postMessage
           },
           onCancel() {
-            console.log('取消录音');
+            console.log("取消录音");
           },
         };
-      }
+      },
     });
 
     bot.run();
